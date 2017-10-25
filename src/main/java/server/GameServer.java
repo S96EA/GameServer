@@ -3,18 +3,18 @@ package server;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class GameServer {
 
     public void server(int port) throws Exception {
         final GameServerHandler gameServerHandler = new GameServerHandler();
-        NioEventLoopGroup eventLoopGroup = new NioEventLoopGroup();
+        EpollEventLoopGroup eventLoopGroup = new EpollEventLoopGroup();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
-            bootstrap.group(eventLoopGroup).channel(NioServerSocketChannel.class)
+            bootstrap.group(eventLoopGroup).channel(EpollServerSocketChannel.class)
                     .localAddress(port)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
@@ -22,7 +22,6 @@ public class GameServer {
                             ch.pipeline().addLast(gameServerHandler);
                         }
                     });
-
             ChannelFuture channelFuture = bootstrap.bind().sync();
             channelFuture.channel().closeFuture().sync();
         } finally {

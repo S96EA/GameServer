@@ -29,6 +29,7 @@ public class GameClientHandler extends ChannelInboundHandlerAdapter {
         String[] position = receive[1].split(",");
         otherShips.get(receive[0]).position.x = Float.parseFloat(position[0]);
         otherShips.get(receive[0]).position.y = Float.parseFloat(position[1]);
+        otherShips.get(receive[0]).ra = Float.parseFloat(position[2]);
         ReferenceCountUtil.release(msg);
     }
 

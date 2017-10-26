@@ -8,8 +8,6 @@ import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.KeyEvent;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
 public class Game extends PApplet {
@@ -45,8 +43,10 @@ public class Game extends PApplet {
     @Override
     public void draw() {
         background(255);
-        gameClient.getChannelFuture().channel()
-                .writeAndFlush(Unpooled.copiedBuffer(ship.position.x + "," + ship.position.y + "\n", CharsetUtil.UTF_8));
+        if (keyPressed) {
+            gameClient.getChannelFuture().channel()
+                    .writeAndFlush(Unpooled.copiedBuffer(ship.position.x + "," + ship.position.y + "," + ship.ra + "\n", CharsetUtil.UTF_8));
+        }
         synchronized (Lock.class) {
             gameClient.gameClientHandler.otherShips.forEach((addr, ship) -> {
                 if (!addr.equals(gameClient.getChannelFuture().channel().localAddress().toString())) {
@@ -62,13 +62,12 @@ public class Game extends PApplet {
     @Override
     public void keyPressed() {
         if (keyCode == LEFT) {
-            ship.ra -= 0.2;
+            ship.veloR(-0.15F);
         }
         if (keyCode == RIGHT) {
-            ship.ra += 0.2;
+            ship.veloR(0.15F);
         }
         if (keyCode == UP) {
-//            ship.acce();
             ship.velo();
         }
     }
@@ -78,12 +77,12 @@ public class Game extends PApplet {
         if (keyCode == UP) {
             ship.stop();
         }
-    }
-
-    @Override
-    public void keyReleased() {
-        if (keyCode == UP) {
-            ship.clearAcce();
+        if (keyCode == LEFT) {
+            ship.veloR(0);
+        }
+        if (keyCode == RIGHT) {
+            ship.veloR(0);
         }
     }
+
 }

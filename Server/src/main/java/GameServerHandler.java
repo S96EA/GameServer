@@ -4,8 +4,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
+import pojo.SpaceshipMsg;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -24,10 +24,9 @@ public class GameServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf receive = (ByteBuf) msg;
-        String response = ctx.channel().remoteAddress() + "#" + receive.toString(CharsetUtil.UTF_8) + "\n";
-//        System.out.println(response);
-        channels.forEach(channel -> channel.writeAndFlush(stringToByteBuf(response)));
+        SpaceshipMsg spaceshipMsg = (SpaceshipMsg) msg;
+        spaceshipMsg.setName(ctx.channel().remoteAddress().toString());
+        channels.forEach(channel -> channel.writeAndFlush(spaceshipMsg));
         ReferenceCountUtil.release(msg);
     }
 

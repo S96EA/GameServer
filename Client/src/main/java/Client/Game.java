@@ -1,9 +1,7 @@
 package Client;
 
-
 import NettyClient.GameClient;
-import io.netty.buffer.Unpooled;
-import io.netty.util.CharsetUtil;
+import pojo.SpaceshipMsg;
 import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.KeyEvent;
@@ -44,8 +42,11 @@ public class Game extends PApplet {
     public void draw() {
         background(255);
         if (keyPressed) {
-            gameClient.getChannelFuture().channel()
-                    .writeAndFlush(Unpooled.copiedBuffer(ship.position.x + "," + ship.position.y + "," + ship.ra + "\n", CharsetUtil.UTF_8));
+            SpaceshipMsg msg = new SpaceshipMsg();
+            msg.setRa(ship.ra);
+            msg.setPositionY(ship.position.y);
+            msg.setPositionX(ship.position.x);
+            gameClient.getChannelFuture().channel().writeAndFlush(msg);
         }
         synchronized (Lock.class) {
             gameClient.gameClientHandler.otherShips.forEach((addr, ship) -> {

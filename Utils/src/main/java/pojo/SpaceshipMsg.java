@@ -7,6 +7,8 @@ public class SpaceshipMsg implements Serializable {
     private float positionX;
     private float positionY;
     private float ra;
+    private boolean isFire;
+    private boolean alive;
 
     public SpaceshipMsg() {
     }
@@ -42,4 +44,22 @@ public class SpaceshipMsg implements Serializable {
     public void setRa(float ra) {
         this.ra = ra;
     }
+
+    public boolean isFire() {
+        return isFire;
+    }
+
+    public void setFire(boolean fire) {
+        isFire = fire;
+    }
+
+    public boolean isAlive() {
+        return alive;
+    }
+
+    public void setAlive(boolean alive) {
+        this.alive = alive;
+    }
+
+
 }

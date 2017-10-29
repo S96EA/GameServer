@@ -5,15 +5,14 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.internal.ConcurrentSet;
 import pojo.SpaceshipMsg;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 
 @Sharable
 public class GameServerHandler extends ChannelInboundHandlerAdapter {
-    List<Channel> channels = new ArrayList<>();
+    ConcurrentSet<Channel> channels = new ConcurrentSet<>();
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -25,7 +24,6 @@ public class GameServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SpaceshipMsg spaceshipMsg = (SpaceshipMsg) msg;
-        spaceshipMsg.setName(ctx.channel().remoteAddress().toString());
         channels.forEach(channel -> channel.writeAndFlush(spaceshipMsg));
         ReferenceCountUtil.release(msg);
     }

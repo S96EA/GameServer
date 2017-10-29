@@ -1,5 +1,6 @@
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -12,10 +13,11 @@ public class GameServer {
 
     public void server(int port) throws Exception {
         final GameServerHandler gameServerHandler = new GameServerHandler();
-        EpollEventLoopGroup eventLoopGroup = new EpollEventLoopGroup();
+        EpollEventLoopGroup parentEventLoopGroup = new EpollEventLoopGroup();
+        EpollEventLoopGroup childEventLoopGroup = new EpollEventLoopGroup();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
-            bootstrap.group(eventLoopGroup).channel(EpollServerSocketChannel.class)
+            bootstrap.group(parentEventLoopGroup, childEventLoopGroup).channel(EpollServerSocketChannel.class)
                     .localAddress(port)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
@@ -28,7 +30,8 @@ public class GameServer {
             ChannelFuture channelFuture = bootstrap.bind().sync();
             channelFuture.channel().closeFuture().sync();
         } finally {
-            eventLoopGroup.shutdownGracefully().sync();
+            parentEventLoopGroup.shutdownGracefully().sync();
+            childEventLoopGroup.shutdownGracefully().sync();
         }
     }
 

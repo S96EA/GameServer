@@ -7,26 +7,25 @@ import io.netty.util.ReferenceCountUtil;
 import pojo.SpaceshipMsg;
 import processing.core.PVector;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GameClientHandler extends ChannelInboundHandlerAdapter {
-    public Map<String, Spaceship> otherShips = new HashMap<>();
+    public ConcurrentHashMap<String, Spaceship> otherShips = new ConcurrentHashMap<>();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SpaceshipMsg spaceshipMsg = (SpaceshipMsg) msg;
         String name = spaceshipMsg.getName();
-        synchronized (Lock.class) {
-            if (otherShips.get(name) == null) {
-                otherShips.put(name, new Spaceship(new PVector()));
-            }
+        if (otherShips.get(name) == null) {
+            otherShips.put(name, new Spaceship(new PVector()));
         }
         Spaceship spaceship = otherShips.get(name);
         spaceship.position.x = spaceshipMsg.getPositionX();
         spaceship.position.y = spaceshipMsg.getPositionY();
         spaceship.ra = spaceshipMsg.getRa();
+        spaceship.isFire = spaceshipMsg.isFire();
+        spaceship.alive = spaceshipMsg.isAlive();
+        spaceship.name = spaceshipMsg.getName();
         ReferenceCountUtil.release(msg);
     }
 

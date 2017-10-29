@@ -12,7 +12,10 @@ public class Spaceship {
     PVector velocity;
     public float ra = 0.00F;
     float vra;
-    boolean isFire;
+    boolean isWalk;
+    public boolean isFire;
+    public boolean alive = true;
+    public String name;
 
     public Spaceship(PVector position) {
         this.position = position.copy();
@@ -20,16 +23,18 @@ public class Spaceship {
     }
 
     void update() {
-        position.add(velocity);
-        ra += vra;
-        if (isFire) {
-            velocity.x = 2.5F * sin(ra);
-            velocity.y = -2.5F * cos(ra);
+        if (alive) {
+            position.add(velocity);
+            ra += vra;
+            if (isWalk) {
+                velocity.x = 2.5F * sin(ra);
+                velocity.y = -2.5F * cos(ra);
+            }
         }
     }
 
     public void velo() {
-        isFire = true;
+        isWalk = true;
     }
 
     public void veloR(float f) {
@@ -37,7 +42,7 @@ public class Spaceship {
     }
 
     public void stop() {
-        isFire = false;
+        isWalk = false;
         velocity.x = 0;
         velocity.y = 0;
     }
@@ -47,11 +52,20 @@ public class Spaceship {
         applet.translate(position.x, position.y);
         applet.rotate(ra);
         applet.noStroke();
-        applet.fill(0);
+        if (alive) {
+            applet.fill(0);
+        } else {
+            applet.fill(0, 255, 0);
+        }
         applet.triangle(-15, 30, 0, 0, 15, 30);
-        if (isFire) applet.fill(255, 0, 0);
+        if (isWalk) applet.fill(255, 0, 0);
         applet.rect(-12, 30, 6, 6);
         applet.rect(6, 30, 6, 6);
+        if (isFire) {
+            applet.stroke(255, 50, 50, 255);
+            applet.strokeWeight(6);
+            applet.line(0, 0, 0, -25);
+        }
         applet.popMatrix();
     }
 
@@ -62,4 +76,10 @@ public class Spaceship {
         if (position.y > applet.height) position.y = 0;
     }
 
+    public void fire(boolean fire) {
+        isFire = fire;
+        if (!alive) {
+            isFire = false;
+        }
+    }
 }

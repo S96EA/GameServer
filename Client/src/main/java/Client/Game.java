@@ -7,7 +7,9 @@ import processing.core.PVector;
 import processing.event.KeyEvent;
 import utils.InTraingle;
 
+import java.io.FileInputStream;
 import java.util.Map;
+import java.util.Properties;
 
 public class Game extends PApplet {
     Spaceship ship;
@@ -26,10 +28,18 @@ public class Game extends PApplet {
 
     @Override
     public void setup() {
+        Properties setting = new Properties();
+        try {
+            String rootPath = System.getProperty("user.dir");
+            FileInputStream in = new FileInputStream(rootPath + "/config.properties");
+            setting.load(in);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         gameClient = new GameClient();
         sockThread = new Thread(() -> {
             try {
-                gameClient.start("127.0.0.1", 8000);
+                gameClient.start(setting.getProperty("host"), Integer.parseInt(setting.getProperty("port")));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -45,7 +55,7 @@ public class Game extends PApplet {
     @Override
     public void draw() {
         background(255);
-        if (keyPressed) {
+        if (keyPressed || frameCount % 30 == 0) {
             outMessage(this.ship);
         }
 
@@ -53,7 +63,7 @@ public class Game extends PApplet {
         otherShips.forEach((name, ship) -> {
             if (!name.equals(this.ship.name)) {
                 ship.display(this);
-                if (this.ship.isFire) {
+                if (this.ship.isFire && ship.alive) {
                     detectHit(this.ship, ship);
                 }
             } else {
@@ -81,13 +91,19 @@ public class Game extends PApplet {
     //检测是否击中
     private void detectHit(Spaceship hitter, Spaceship spaceship) {
         if (hitter.alive && spaceship.alive) {
-            if (InTraingle.inTraingle(new PVector(hitter.position.x + 25 * sin(hitter.ra) - spaceship.position.x
-                            , hitter.position.y - 25 * cos(hitter.ra) - spaceship.position.y)
-                    , new PVector(0, 0)
-                    , new PVector(-15, 30).rotate(spaceship.ra)
-                    , new PVector(15, 30).rotate(spaceship.ra))) {
-                spaceship.alive = false;
-                outMessage(spaceship);
+            float weaponLength = 25;
+            float granularity = 8;
+            for (int i = 0; i <= weaponLength; i = (int) (i + granularity)) {
+                if (InTraingle.inTraingle(
+                        new PVector(hitter.position.x + i * sin(hitter.ra) - spaceship.position.x,
+                                hitter.position.y - i * cos(hitter.ra) - spaceship.position.y),
+                        new PVector(0, 0),
+                        new PVector(-15, 30).rotate(spaceship.ra),
+                        new PVector(15, 30).rotate(spaceship.ra))) {
+                    spaceship.alive = false;
+                    outMessage(spaceship);
+                    break;
+                }
             }
         }
     }
@@ -103,6 +119,7 @@ public class Game extends PApplet {
         if (keyCode == UP) {
             ship.velo();
         }
+        //attack
         if (key == 'z') {
             ship.fire(true);
         }
@@ -121,8 +138,8 @@ public class Game extends PApplet {
         }
         if (key == 'z') {
             ship.fire(false);
+            outMessage(this.ship);
         }
-        outMessage(this.ship);
     }
 
 }

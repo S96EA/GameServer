@@ -22,7 +22,7 @@ public class GameClientHandler extends ChannelInboundHandlerAdapter {
         Spaceship spaceship = otherShips.get(name);
         spaceship.position.x = spaceshipMsg.getPositionX();
         spaceship.position.y = spaceshipMsg.getPositionY();
-        spaceship.ra = spaceshipMsg.getRa();
+        spaceship.angular = spaceshipMsg.getAngular();
         spaceship.isFire = spaceshipMsg.isFire();
         spaceship.alive = spaceshipMsg.isAlive();
         spaceship.name = spaceshipMsg.getName();

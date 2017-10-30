@@ -6,7 +6,7 @@ public class SpaceshipMsg implements Serializable {
     private String name;
     private float positionX;
     private float positionY;
-    private float ra;
+    private float angular;
     private boolean isFire;
     private boolean alive;
 
@@ -37,12 +37,12 @@ public class SpaceshipMsg implements Serializable {
         this.positionY = positionY;
     }
 
-    public float getRa() {
-        return ra;
+    public float getAngular() {
+        return angular;
     }
 
-    public void setRa(float ra) {
-        this.ra = ra;
+    public void setAngular(float angular) {
+        this.angular = angular;
     }
 
     public boolean isFire() {

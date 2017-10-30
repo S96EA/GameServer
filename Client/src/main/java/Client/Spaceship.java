@@ -8,14 +8,17 @@ import static processing.core.PApplet.cos;
 import static processing.core.PApplet.sin;
 
 public class Spaceship {
+    public String name;
+    public boolean isFire;
     public PVector position;
     PVector velocity;
-    public float ra = 0.00F;
-    float vra;
-    boolean isWalk;
-    public boolean isFire;
+    public float angular = 0.00F;
     public boolean alive = true;
-    public String name;
+    float[] speeds = {0, 2.5F, 5F};
+    float speedModule = speeds[0];
+    float[] angularSpeeds = {0, 0.15F};
+    float angularSpeed = angularSpeeds[0];
+    float weaponLength = 40;
 
     public Spaceship(PVector position) {
         this.position = position.copy();
@@ -25,32 +28,40 @@ public class Spaceship {
     void update() {
         if (alive) {
             position.add(velocity);
-            ra += vra;
-            if (isWalk) {
-                velocity.x = 2.5F * sin(ra);
-                velocity.y = -2.5F * cos(ra);
-            }
+            angular += angularSpeed;
+            velocity.x = speedModule * sin(angular);
+            velocity.y = -speedModule * cos(angular);
         }
     }
 
-    public void velo() {
-        isWalk = true;
+    public void rotateLeft() {
+        angularSpeed = -angularSpeeds[1];
+    }
+
+    public void rotateRight() {
+        angularSpeed = angularSpeeds[1];
+    }
+
+    public void rotateOff() {
+        angularSpeed = angularSpeeds[0];
+    }
+
+    public void speedOn() {
+        speedModule = speeds[1];
     }
 
     public void veloR(float f) {
-        vra = f;
+        angularSpeed = f;
     }
 
-    public void stop() {
-        isWalk = false;
-        velocity.x = 0;
-        velocity.y = 0;
+    public void speedOff() {
+        speedModule = speeds[0];
     }
 
     void display(PApplet applet) {
         applet.pushMatrix();
         applet.translate(position.x, position.y);
-        applet.rotate(ra);
+        applet.rotate(angular);
         applet.noStroke();
         if (alive) {
             applet.fill(0);
@@ -58,13 +69,13 @@ public class Spaceship {
             applet.fill(0, 255, 0);
         }
         applet.triangle(-15, 30, 0, 0, 15, 30);
-        if (isWalk) applet.fill(255, 0, 0);
+        if (speedModule != 0) applet.fill(255, 0, 0);
         applet.rect(-12, 30, 6, 6);
         applet.rect(6, 30, 6, 6);
         if (isFire) {
             applet.stroke(255, 50, 50, 255);
             applet.strokeWeight(6);
-            applet.line(0, 0, 0, -25);
+            applet.line(0, 0, 0, -weaponLength);
         }
         applet.popMatrix();
     }
@@ -81,5 +92,13 @@ public class Spaceship {
         if (!alive) {
             isFire = false;
         }
+    }
+
+    public void speedUp() {
+        speedModule = speeds[2];
+    }
+
+    public void speedDown() {
+        speedModule = speeds[1];
     }
 }

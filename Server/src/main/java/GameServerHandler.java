@@ -1,9 +1,7 @@
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
+import io.netty.channel.*;
 import io.netty.channel.ChannelHandler.Sharable;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.ConcurrentSet;
@@ -25,8 +23,9 @@ public class GameServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SpaceshipMsg spaceshipMsg = (SpaceshipMsg) msg;
-        channels.forEach(channel -> channel.writeAndFlush(spaceshipMsg));
-        ReferenceCountUtil.release(msg);
+        channels.forEach(channel -> channel.writeAndFlush(spaceshipMsg).addListener((ChannelFutureListener) future -> {
+            ReferenceCountUtil.release(msg);
+        }));
     }
 
     @Override

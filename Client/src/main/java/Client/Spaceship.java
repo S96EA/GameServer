@@ -14,18 +14,35 @@ public class Spaceship {
     PVector velocity;
     public float angular = 0.00F;
     public boolean alive = true;
-    float[] speeds = {0, 2.5F, 5F};
+    float[] speeds = {0, 2.0F, 5F};
     float speedModule = speeds[0];
     float[] angularSpeeds = {0, 0.15F};
     float angularSpeed = angularSpeeds[0];
     float weaponLength = 40;
+    boolean isMove;
+    int cntBuulet = 120;
+    boolean recoverMode;
 
     public Spaceship(PVector position) {
         this.position = position.copy();
         velocity = new PVector();
     }
 
+    protected Spaceship() {
+    }
+
     void update() {
+
+        if (cntBuulet <= 0) {
+            recoverMode = true;
+        } else if (cntBuulet == 120) {
+            recoverMode = false;
+        }
+        if (recoverMode) {
+            cntBuulet++;
+        } else if (isFire) {
+            cntBuulet--;
+        }
         if (alive) {
             position.add(velocity);
             angular += angularSpeed;
@@ -47,6 +64,7 @@ public class Spaceship {
     }
 
     public void speedOn() {
+        isMove = true;
         speedModule = speeds[1];
     }
 
@@ -55,10 +73,12 @@ public class Spaceship {
     }
 
     public void speedOff() {
+        isMove = false;
         speedModule = speeds[0];
     }
 
     void display(PApplet applet) {
+        applet.pushStyle();
         applet.pushMatrix();
         applet.translate(position.x, position.y);
         applet.rotate(angular);
@@ -72,12 +92,13 @@ public class Spaceship {
         if (speedModule != 0) applet.fill(255, 0, 0);
         applet.rect(-12, 30, 6, 6);
         applet.rect(6, 30, 6, 6);
-        if (isFire) {
+        if (isFire && !recoverMode) {
             applet.stroke(255, 50, 50, 255);
             applet.strokeWeight(6);
             applet.line(0, 0, 0, -weaponLength);
         }
         applet.popMatrix();
+        applet.popStyle();
     }
 
     void checkEdge(PApplet applet) {
@@ -95,10 +116,16 @@ public class Spaceship {
     }
 
     public void speedUp() {
-        speedModule = speeds[2];
+        if (isMove) {
+            speedModule = speeds[2];
+        }
     }
 
     public void speedDown() {
-        speedModule = speeds[1];
+        if (isMove) {
+            speedModule = speeds[1];
+        } else {
+            speedModule = speeds[0];
+        }
     }
 }

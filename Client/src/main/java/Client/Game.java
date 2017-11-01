@@ -3,6 +3,8 @@ package Client;
 import NettyClient.GameClient;
 import pojo.SpaceshipMsg;
 import processing.core.PApplet;
+import processing.core.PFont;
+import processing.core.PShapeSVG;
 import processing.core.PVector;
 import processing.event.KeyEvent;
 import utils.InTraingle;
@@ -14,6 +16,16 @@ public class Game extends PApplet {
     GameClient gameClient;
     Thread sockThread;
     Map<String, Spaceship> otherShips;
+    double[][] ells = {{1009.0318, 623.7608},
+            {734.2482, 534.18054},
+            {188.86328, 530.5219},
+            {101.76337, 667.459},
+            {535.6365, 760.9304},
+            {638.4929, 333.65817},
+            {860.2104, 526.9345},
+            {768.6866, 430.33615},
+            {658.1058, 89.11095},
+            {730.5657, 565.74036}};
 
     public static void main(String[] args) {
         PApplet.main("Client.Game");
@@ -21,7 +33,7 @@ public class Game extends PApplet {
 
     @Override
     public void settings() {
-        size(600, 600);
+        size(1200, 800);
     }
 
     @Override
@@ -45,15 +57,24 @@ public class Game extends PApplet {
         });
         sockThread.start();
         myShip = new Spaceship(new PVector(width / 2, height / 2));
-        background(255);
+        background(200);
         while (gameClient.getChannelFuture() == null || !gameClient.getChannelFuture().isSuccess()) ;
         otherShips = gameClient.gameClientHandler.otherShips;
         myShip.name = gameClient.getChannelFuture().channel().localAddress().toString();
+        textSize(30);
     }
 
     @Override
     public void draw() {
-        background(255);
+        background(200);
+        pushStyle();
+        noStroke();
+        fill(0);
+        for (int i = 0; i < 10; i++) {
+            ellipse((float) ells[i][0], (float) ells[i][1], 60, 60);
+        }
+        popStyle();
+
         if (keyPressed || frameCount % 30 == 0) {
             outMessage(this.myShip);
         }
@@ -62,7 +83,7 @@ public class Game extends PApplet {
         otherShips.forEach((name, other) -> {
             if (!name.equals(this.myShip.name)) {
                 other.display(this);
-                if (this.myShip.isFire && other.alive) {
+                if (this.myShip.isFire && !this.myShip.recoverMode && other.alive) {
                     detectHit(this.myShip, other);
                 }
             } else {
@@ -70,6 +91,7 @@ public class Game extends PApplet {
                 this.myShip.alive = other.alive;
             }
         });
+        text(myShip.cntBuulet, 1100, 750);
         this.myShip.checkEdge(this);
         this.myShip.update();
         this.myShip.display(this);
@@ -82,7 +104,7 @@ public class Game extends PApplet {
         msg.setAngular(outShip.angular);
         msg.setPositionY(outShip.position.y);
         msg.setPositionX(outShip.position.x);
-        msg.setFire(outShip.isFire);
+        msg.setFire(outShip.isFire && !outShip.recoverMode);
         msg.setAlive(outShip.alive);
         gameClient.getChannelFuture().channel().writeAndFlush(msg);
     }
@@ -125,6 +147,7 @@ public class Game extends PApplet {
             myShip.fire(true);
         }
     }
+
 
     @Override
     public void keyReleased(KeyEvent event) {
